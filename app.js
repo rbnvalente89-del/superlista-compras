@@ -18,9 +18,7 @@ const CATEGORIA_EMOJIS = {
     "Merciaria": "🍞"
 };
 
-// Dicionário para auto-categorização com base no que o utilizador escreve
 const SMART_CATALOG = {
-    // Frutas
     "banana": { category: "Frutas", unit: "un" },
     "bananas": { category: "Frutas", unit: "un" },
     "maca": { category: "Frutas", unit: "kg" },
@@ -40,8 +38,6 @@ const SMART_CATALOG = {
     "melancia": { category: "Frutas", unit: "un" },
     "pessego": { category: "Frutas", unit: "kg" },
     "pêssego": { category: "Frutas", unit: "kg" },
-    
-    // Limpeza e Higiene
     "detergente": { category: "Limpeza e Higiene", unit: "L" },
     "amaciador": { category: "Limpeza e Higiene", unit: "L" },
     "sabonete": { category: "Limpeza e Higiene", unit: "un" },
@@ -57,8 +53,6 @@ const SMART_CATALOG = {
     "lixívia": { category: "Limpeza e Higiene", unit: "L" },
     "guardanapos": { category: "Limpeza e Higiene", unit: "pacotes" },
     "desodorizante": { category: "Limpeza e Higiene", unit: "un" },
-    
-    // Casa e Cozinha
     "vela": { category: "Casa e Cozinha", unit: "un" },
     "velas": { category: "Casa e Cozinha", unit: "un" },
     "copo": { category: "Casa e Cozinha", unit: "un" },
@@ -70,8 +64,6 @@ const SMART_CATALOG = {
     "esfregona": { category: "Casa e Cozinha", unit: "un" },
     "vassoura": { category: "Casa e Cozinha", unit: "un" },
     "pilhas": { category: "Casa e Cozinha", unit: "pacotes" },
-    
-    // Congelados
     "pizza": { category: "Congelados", unit: "un" },
     "pizzas": { category: "Congelados", unit: "un" },
     "gelado": { category: "Congelados", unit: "un" },
@@ -81,8 +73,6 @@ const SMART_CATALOG = {
     "hambúrguer": { category: "Congelados", unit: "un" },
     "douradinhos": { category: "Congelados", unit: "pacotes" },
     "batatas fritas": { category: "Congelados", unit: "kg" },
-    
-    // Bebidas
     "agua": { category: "Bebidas", unit: "L" },
     "água": { category: "Bebidas", unit: "L" },
     "cerveja": { category: "Bebidas", unit: "un" },
@@ -93,10 +83,7 @@ const SMART_CATALOG = {
     "coca-cola": { category: "Bebidas", unit: "un" },
     "coca cola": { category: "Bebidas", unit: "un" },
     "ice tea": { category: "Bebidas", unit: "L" },
-    "icetea": { category: "Bebidas", unit: "L" },
     "refrigerante": { category: "Bebidas", unit: "L" },
-    
-    // Laticínios
     "leite": { category: "Laticínios", unit: "L" },
     "iogurte": { category: "Laticínios", unit: "un" },
     "iogurtes": { category: "Laticínios", unit: "pacotes" },
@@ -105,8 +92,6 @@ const SMART_CATALOG = {
     "margarina": { category: "Laticínios", unit: "un" },
     "requeijao": { category: "Laticínios", unit: "un" },
     "requeijão": { category: "Laticínios", unit: "un" },
-    
-    // Charcutaria
     "queijo": { category: "Charcutaria", unit: "g" },
     "queijos": { category: "Charcutaria", unit: "g" },
     "presunto": { category: "Charcutaria", unit: "g" },
@@ -116,8 +101,6 @@ const SMART_CATALOG = {
     "salame": { category: "Charcutaria", unit: "g" },
     "salsicha": { category: "Charcutaria", unit: "un" },
     "salsichas": { category: "Charcutaria", unit: "latas" },
-    
-    // Merciaria
     "arroz": { category: "Merciaria", unit: "kg" },
     "massa": { category: "Merciaria", unit: "kg" },
     "grao": { category: "Merciaria", unit: "g" },
@@ -148,12 +131,11 @@ let state = {
     items: [],
     theme: "light",
     filters: {
-        status: "all",      // 'all', 'pending', 'completed'
-        category: "all",    // 'all' ou nome específico da categoria
-        search: ""          // string de pesquisa
+        status: "all",
+        category: "all",
+        search: ""
     },
     syncCode: null,
-    isSyncing: false,
     syncIntervalId: null
 };
 
@@ -164,13 +146,9 @@ let state = {
 const DOM = {
     body: document.body,
     themeToggleBtn: document.getElementById("theme-toggle-btn"),
-    
-    // Estatísticas
     statsCounter: document.getElementById("stats-counter"),
     statsPercentage: document.getElementById("stats-percentage"),
     statsProgressBar: document.getElementById("stats-progress-bar"),
-    
-    // Formulário
     addForm: document.getElementById("add-product-form"),
     prodName: document.getElementById("product-name"),
     prodQty: document.getElementById("product-quantity"),
@@ -180,23 +158,15 @@ const DOM = {
     qtyPlusBtn: document.getElementById("qty-plus"),
     autocompleteDropdown: document.getElementById("autocomplete-suggestions"),
     quickChips: document.querySelectorAll(".quick-chip"),
-    
-    // Pesquisa e Filtros
     searchInput: document.getElementById("search-items-input"),
     clearSearchBtn: document.getElementById("clear-search-btn"),
     filterTabs: document.querySelectorAll(".tab-btn"),
     catFiltersScroll: document.querySelector(".category-filters-scroll"),
-    
-    // Conteúdo da Lista
     listContainer: document.getElementById("shopping-list"),
     emptyState: document.getElementById("empty-state"),
     noResultsState: document.getElementById("no-results-state"),
-    
-    // Ações do Rodapé
     shareListBtn: document.getElementById("share-list-btn"),
     clearListBtn: document.getElementById("clear-list-btn"),
-    
-    // Modal Editar
     editModal: document.getElementById("edit-modal"),
     editForm: document.getElementById("edit-product-form"),
     editId: document.getElementById("edit-product-id"),
@@ -206,18 +176,13 @@ const DOM = {
     editCategory: document.getElementById("edit-product-category"),
     closeEditModal: document.getElementById("close-edit-modal"),
     cancelEditBtn: document.getElementById("cancel-edit-btn"),
-    
-    // Modal Confirmar Limpeza
     clearModal: document.getElementById("clear-confirm-modal"),
     closeClearModal: document.getElementById("close-clear-modal"),
     cancelClearBtn: document.getElementById("cancel-clear-btn"),
     confirmClearBtn: document.getElementById("confirm-clear-btn"),
-    
-    // Toast Notificação
     toast: document.getElementById("toast-notification"),
     toastMsg: document.getElementById("toast-message"),
-    
-    // Nuvem (Fase 2)
+    // Painel de Nuvem
     syncDot: document.getElementById("sync-dot"),
     syncStatusText: document.getElementById("sync-status-text"),
     toggleSyncPanelBtn: document.getElementById("toggle-sync-panel-btn"),
@@ -246,16 +211,14 @@ document.addEventListener("DOMContentLoaded", () => {
     render();
 });
 
-// Carrega o estado a partir do LocalStorage
 function loadState() {
     const savedItems = localStorage.getItem("superlista_items");
     const savedTheme = localStorage.getItem("superlista_theme");
     const savedSyncCode = localStorage.getItem("superlista_synccode");
-    
+
     if (savedItems) {
         state.items = JSON.parse(savedItems);
     } else {
-        // Dados de teste para demonstração inicial apelativa
         state.items = [
             { id: "1", name: "Bananas da Madeira", quantity: 5, unit: "un", category: "Frutas", completed: false },
             { id: "2", name: "Leite UHT Gordo", quantity: 6, unit: "L", category: "Laticínios", completed: false },
@@ -264,11 +227,10 @@ function loadState() {
         ];
         saveState();
     }
-    
+
     if (savedTheme) {
         state.theme = savedTheme;
     } else {
-        // Deteta preferências do sistema operativo do utilizador
         const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
         state.theme = prefersDark ? "dark" : "light";
     }
@@ -278,7 +240,6 @@ function loadState() {
     }
 }
 
-// Guarda o estado no LocalStorage
 function saveState() {
     localStorage.setItem("superlista_items", JSON.stringify(state.items));
     localStorage.setItem("superlista_theme", state.theme);
@@ -289,7 +250,6 @@ function saveState() {
     }
 }
 
-// Configura o tema inicial na página
 function setupTheme() {
     DOM.body.className = `theme-${state.theme}`;
 }
@@ -299,7 +259,6 @@ function setupTheme() {
 // ==========================================================================
 
 function setupEventListeners() {
-    // Alternância do Tema Claro/Escuro
     DOM.themeToggleBtn.addEventListener("click", () => {
         state.theme = state.theme === "light" ? "dark" : "light";
         DOM.body.className = `theme-${state.theme}`;
@@ -307,40 +266,29 @@ function setupEventListeners() {
         showToast(state.theme === "light" ? "Tema Claro Ativo" : "Tema Escuro Ativo");
     });
 
-    // Controlos de Quantidade (+ e -)
     DOM.qtyMinusBtn.addEventListener("click", () => {
         let val = parseFloat(DOM.prodQty.value);
-        if (val > 1) {
-            DOM.prodQty.value = val - 1;
-        }
+        if (val > 1) DOM.prodQty.value = val - 1;
     });
 
     DOM.qtyPlusBtn.addEventListener("click", () => {
-        let val = parseFloat(DOM.prodQty.value);
-        DOM.prodQty.value = val + 1;
+        DOM.prodQty.value = parseFloat(DOM.prodQty.value) + 1;
     });
 
-    // Auto-categorização inteligente enquanto o utilizador escreve
     DOM.prodName.addEventListener("input", (e) => {
         const text = e.target.value.toLowerCase().trim();
         handleSmartCategorization(text);
         handleAutocompleteSuggestions(text);
     });
 
-    // Submissão do Formulário de Adição
     DOM.addForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        
         const name = DOM.prodName.value.trim();
         const quantity = parseFloat(DOM.prodQty.value) || 1;
         const unit = DOM.prodUnit.value;
         const category = DOM.prodCategory.value;
-        
         if (!name || !category) return;
-        
         addItem(name, quantity, unit, category);
-        
-        // Limpa e repõe o formulário
         DOM.addForm.reset();
         DOM.prodQty.value = "1";
         DOM.prodUnit.value = "un";
@@ -348,33 +296,24 @@ function setupEventListeners() {
         DOM.autocompleteDropdown.classList.add("hidden");
     });
 
-    // Fechar dropdown de sugestões ao clicar fora
     document.addEventListener("click", (e) => {
         if (!DOM.prodName.contains(e.target) && !DOM.autocompleteDropdown.contains(e.target)) {
             DOM.autocompleteDropdown.classList.add("hidden");
         }
     });
 
-    // Chips de Adição Rápida
     DOM.quickChips.forEach(chip => {
         chip.addEventListener("click", () => {
             const name = chip.getAttribute("data-name");
             const category = chip.getAttribute("data-cat");
             const unit = chip.getAttribute("data-unit");
-            
             addItem(name, 1, unit, category);
-            showToast(`Adicionado: ${name}`);
         });
     });
 
-    // Filtros de Pesquisa
     DOM.searchInput.addEventListener("input", (e) => {
         state.filters.search = e.target.value;
-        if (state.filters.search.length > 0) {
-            DOM.clearSearchBtn.classList.remove("hidden");
-        } else {
-            DOM.clearSearchBtn.classList.add("hidden");
-        }
+        DOM.clearSearchBtn.classList.toggle("hidden", state.filters.search.length === 0);
         render();
     });
 
@@ -385,7 +324,6 @@ function setupEventListeners() {
         render();
     });
 
-    // Abas de Estado (Todos, Por Comprar, Comprados)
     DOM.filterTabs.forEach(tab => {
         tab.addEventListener("click", () => {
             DOM.filterTabs.forEach(t => t.classList.remove("active"));
@@ -395,33 +333,26 @@ function setupEventListeners() {
         });
     });
 
-    // Filtro Rápido de Categorias (Scroll Horizontal)
     setupCategoryFilterEvents();
 
-    // Rodapé - Partilhar Lista
     DOM.shareListBtn.addEventListener("click", shareList);
 
-    // Rodapé - Limpar Lista
     DOM.clearListBtn.addEventListener("click", () => {
         DOM.clearModal.classList.remove("hidden");
     });
 
-    // Modais - Fechar & Cancelar Ações
     DOM.closeEditModal.addEventListener("click", () => DOM.editModal.classList.add("hidden"));
     DOM.cancelEditBtn.addEventListener("click", () => DOM.editModal.classList.add("hidden"));
     DOM.closeClearModal.addEventListener("click", () => DOM.clearModal.classList.add("hidden"));
     DOM.cancelClearBtn.addEventListener("click", () => DOM.clearModal.classList.add("hidden"));
 
-    // Modal Editar - Submeter Alterações
     DOM.editForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        
         const id = DOM.editId.value;
         const name = DOM.editName.value.trim();
         const quantity = parseFloat(DOM.editQty.value) || 1;
         const unit = DOM.editUnit.value;
         const category = DOM.editCategory.value;
-        
         if (id && name && category) {
             updateItem(id, name, quantity, unit, category);
             DOM.editModal.classList.add("hidden");
@@ -429,45 +360,32 @@ function setupEventListeners() {
         }
     });
 
-    // Modal Limpar - Confirmar Ação
     DOM.confirmClearBtn.addEventListener("click", () => {
         clearList();
         DOM.clearModal.classList.add("hidden");
     });
 
-    // Nuvem (Fase 2) Event Listeners
+    // Painel de Nuvem
     DOM.toggleSyncPanelBtn.addEventListener("click", () => {
         DOM.syncExpandedContent.classList.toggle("hidden");
-        DOM.toggleSyncPanelBtn.textContent = DOM.syncExpandedContent.classList.contains("hidden") ? "Configurar Nuvem" : "Fechar Painel";
+        DOM.toggleSyncPanelBtn.textContent = DOM.syncExpandedContent.classList.contains("hidden")
+            ? "Configurar Nuvem" : "Fechar Painel";
     });
-    
+
     DOM.showJoinInputBtn.addEventListener("click", () => {
         DOM.joinInputWrapper.classList.toggle("hidden");
     });
-    
-    DOM.createCloudListBtn.addEventListener("click", () => {
-        generateAndCreateCloudList();
-    });
-    
+
+    DOM.createCloudListBtn.addEventListener("click", generateAndCreateCloudList);
     DOM.confirmJoinBtn.addEventListener("click", () => {
-        const code = DOM.joinListCode.value.trim().toLowerCase();
-        if (code) {
-            joinCloudList(code);
-        }
+        const code = DOM.joinListCode.value.trim();
+        if (code) joinCloudList(code);
     });
-    
-    DOM.copyShareLinkBtn.addEventListener("click", () => {
-        copyCloudShareLink();
-    });
-    
-    DOM.disconnectSyncBtn.addEventListener("click", () => {
-        disconnectCloudSync();
-    });
+    DOM.copyShareLinkBtn.addEventListener("click", copyCloudShareLink);
+    DOM.disconnectSyncBtn.addEventListener("click", disconnectCloudSync);
 }
 
-// Configura eventos para os botões de filtro de categoria dinâmicos
 function setupCategoryFilterEvents() {
-    // Captura os botões da lista horizontal
     const catBtns = DOM.catFiltersScroll.querySelectorAll(".cat-filter-btn");
     catBtns.forEach(btn => {
         btn.addEventListener("click", () => {
@@ -480,18 +398,14 @@ function setupCategoryFilterEvents() {
 }
 
 // ==========================================================================
-// FUNÇÕES DE LÓGICA DE CATEGORIZAÇÃO & AUTOCOMPLETE
+// AUTO-CATEGORIZAÇÃO & AUTOCOMPLETE
 // ==========================================================================
 
 function handleSmartCategorization(text) {
-    // Procura por correspondência direta ou por parte da palavra no catálogo inteligente
     let foundMatch = null;
-    
-    // Procura termo exato
     if (SMART_CATALOG[text]) {
         foundMatch = SMART_CATALOG[text];
     } else {
-        // Procura se o texto contém algum dos termos chave
         for (const [key, value] of Object.entries(SMART_CATALOG)) {
             if (text.length >= 3 && (key.includes(text) || text.includes(key))) {
                 foundMatch = value;
@@ -499,7 +413,6 @@ function handleSmartCategorization(text) {
             }
         }
     }
-
     if (foundMatch) {
         DOM.prodCategory.value = foundMatch.category;
         DOM.prodUnit.value = foundMatch.unit;
@@ -511,36 +424,18 @@ function handleAutocompleteSuggestions(text) {
         DOM.autocompleteDropdown.classList.add("hidden");
         return;
     }
-
-    // Filtra itens correspondentes do catálogo
-    const matches = Object.entries(SMART_CATALOG)
-        .filter(([key]) => key.includes(text))
-        .slice(0, 5); // Limita a 5 sugestões
-
+    const matches = Object.entries(SMART_CATALOG).filter(([key]) => key.includes(text)).slice(0, 5);
     if (matches.length === 0) {
         DOM.autocompleteDropdown.classList.add("hidden");
         return;
     }
-
     DOM.autocompleteDropdown.innerHTML = "";
-    
     matches.forEach(([key, val]) => {
         const itemDiv = document.createElement("div");
         itemDiv.className = "autocomplete-item";
-        
-        // Capitaliza a sugestão
         const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
-        
-        // Define a cor de badge da categoria
         const emoji = CATEGORIA_EMOJIS[val.category] || "📦";
-        
-        itemDiv.innerHTML = `
-            <span>${capitalizedKey}</span>
-            <span class="item-cat" style="background-color: hsl(var(--hue-${val.category.toLowerCase().replace(/ e /g, '-').replace(/ /g, '-').normalize('NFD').replace(/[\u0300-\u036f]/g, "")}), 70%, 95%); color: hsl(var(--hue-${val.category.toLowerCase().replace(/ e /g, '-').replace(/ /g, '-').normalize('NFD').replace(/[\u0300-\u036f]/g, "")}), 70%, 35%);">
-                ${emoji} ${val.category}
-            </span>
-        `;
-        
+        itemDiv.innerHTML = `<span>${capitalizedKey}</span><span class="item-cat">${emoji} ${val.category}</span>`;
         itemDiv.addEventListener("click", () => {
             DOM.prodName.value = capitalizedKey;
             DOM.prodCategory.value = val.category;
@@ -548,55 +443,37 @@ function handleAutocompleteSuggestions(text) {
             DOM.autocompleteDropdown.classList.add("hidden");
             DOM.prodQty.focus();
         });
-        
         DOM.autocompleteDropdown.appendChild(itemDiv);
     });
-
     DOM.autocompleteDropdown.classList.remove("hidden");
 }
 
 // ==========================================================================
-// OPERAÇÕES CRUD NO ESTADO
+// CRUD
 // ==========================================================================
 
-// Adiciona um novo item
 function addItem(name, quantity, unit, category) {
-    const newItem = {
-        id: Date.now().toString(),
-        name,
-        quantity,
-        unit,
-        category,
-        completed: false
-    };
-    
-    state.items.unshift(newItem); // Adiciona ao início da lista
+    const newItem = { id: Date.now().toString(), name, quantity, unit, category, completed: false };
+    state.items.unshift(newItem);
     saveState();
     render();
     showToast(`Adicionado: ${name}`);
     pushCloudItems();
 }
 
-// Edita / Atualiza um item
 function updateItem(id, name, quantity, unit, category) {
-    state.items = state.items.map(item => {
-        if (item.id === id) {
-            return { ...item, name, quantity, unit, category };
-        }
-        return item;
-    });
+    state.items = state.items.map(item => item.id === id ? { ...item, name, quantity, unit, category } : item);
     saveState();
     render();
     pushCloudItems();
 }
 
-// Alterna estado de conclusão (comprado)
 function toggleItemCompleted(id) {
     state.items = state.items.map(item => {
         if (item.id === id) {
-            const updatedState = !item.completed;
-            showToast(updatedState ? `Comprado: ${item.name}` : `Reposto: ${item.name}`);
-            return { ...item, completed: updatedState };
+            const done = !item.completed;
+            showToast(done ? `Comprado: ${item.name}` : `Reposto: ${item.name}`);
+            return { ...item, completed: done };
         }
         return item;
     });
@@ -605,19 +482,15 @@ function toggleItemCompleted(id) {
     pushCloudItems();
 }
 
-// Elimina um item individual
 function deleteItem(id) {
     const itemToDelete = state.items.find(item => item.id === id);
     state.items = state.items.filter(item => item.id !== id);
     saveState();
     render();
-    if (itemToDelete) {
-        showToast(`Removido: ${itemToDelete.name}`);
-    }
+    if (itemToDelete) showToast(`Removido: ${itemToDelete.name}`);
     pushCloudItems();
 }
 
-// Limpa toda a lista de compras
 function clearList() {
     state.items = [];
     saveState();
@@ -627,108 +500,65 @@ function clearList() {
 }
 
 // ==========================================================================
-// FUNÇÕES AUXILIARES E DE INTERACTION DESIGNS
+// AUXILIARES
 // ==========================================================================
 
-// Mostra o Toast de Notificação
 function showToast(message) {
     DOM.toastMsg.textContent = message;
     DOM.toast.classList.remove("hidden");
-    
-    // Reset do timer se já estiver visível
-    if (DOM.toast.timerId) {
-        clearTimeout(DOM.toast.timerId);
-    }
-    
-    DOM.toast.timerId = setTimeout(() => {
-        DOM.toast.classList.add("hidden");
-    }, 2200);
+    if (DOM.toast.timerId) clearTimeout(DOM.toast.timerId);
+    DOM.toast.timerId = setTimeout(() => DOM.toast.classList.add("hidden"), 2200);
 }
 
-// Abre o Modal de Edição com dados pré-preenchidos
 function openEditModalWithData(id) {
     const item = state.items.find(i => i.id === id);
     if (!item) return;
-    
     DOM.editId.value = item.id;
     DOM.editName.value = item.name;
     DOM.editQty.value = item.quantity;
     DOM.editUnit.value = item.unit;
     DOM.editCategory.value = item.category;
-    
     DOM.editModal.classList.remove("hidden");
 }
 
-// Partilha a lista no formato de texto bonito copiado para a Área de Transferência
 function shareList() {
-    if (state.items.length === 0) {
-        showToast("Adicione produtos primeiro!");
-        return;
-    }
-    
-    // Agrupa todos os itens ativos por categoria para o texto
+    if (state.items.length === 0) { showToast("Adicione produtos primeiro!"); return; }
     const groups = {};
     state.items.forEach(item => {
-        if (!groups[item.category]) {
-            groups[item.category] = [];
-        }
+        if (!groups[item.category]) groups[item.category] = [];
         groups[item.category].push(item);
     });
-
     let shareText = "🛒 *MINHA SUPERLISTA DE COMPRAS*\n\n";
-    
     Object.keys(groups).forEach(category => {
         const emoji = CATEGORIA_EMOJIS[category] || "📦";
         shareText += `*${emoji} ${category.toUpperCase()}*\n`;
-        
         groups[category].forEach(item => {
-            const check = item.completed ? "✅" : "⬜";
-            shareText += `${check} ${item.quantity} ${item.unit} x ${item.name}\n`;
+            shareText += `${item.completed ? "✅" : "⬜"} ${item.quantity} ${item.unit} x ${item.name}\n`;
         });
         shareText += "\n";
     });
-    
     const completedCount = state.items.filter(i => i.completed).length;
     const totalCount = state.items.length;
     const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-    
     shareText += `*Progresso:* ${completedCount} de ${totalCount} comprados (${percentage}%)`;
-    
     navigator.clipboard.writeText(shareText)
-        .then(() => {
-            showToast("Lista copiada! Cole no WhatsApp.");
-        })
-        .catch(err => {
-            console.error("Falha ao copiar:", err);
-            showToast("Erro ao partilhar.");
-        });
+        .then(() => showToast("Lista copiada! Cole no WhatsApp."))
+        .catch(() => showToast("Erro ao partilhar."));
 }
 
 // ==========================================================================
-// DESENHAR / ATUALIZAR A INTERFACE (RENDER)
+// RENDER
 // ==========================================================================
 
 function render() {
     const { status, category, search } = state.filters;
-    
-    // 1. Filtra itens conforme as definições de pesquisa e estado
     let filteredItems = state.items.filter(item => {
-        // Filtro de estado
-        const matchesStatus = 
-            status === "all" || 
-            (status === "pending" && !item.completed) || 
-            (status === "completed" && item.completed);
-            
-        // Filtro de categoria
+        const matchesStatus = status === "all" || (status === "pending" && !item.completed) || (status === "completed" && item.completed);
         const matchesCategory = category === "all" || item.category === category;
-        
-        // Filtro de pesquisa de texto
         const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
-        
         return matchesStatus && matchesCategory && matchesSearch;
     });
 
-    // 2. Controlar os estados vazios visuais na página
     if (state.items.length === 0) {
         DOM.emptyState.classList.remove("hidden");
         DOM.noResultsState.classList.add("hidden");
@@ -743,38 +573,25 @@ function render() {
         DOM.listContainer.classList.remove("hidden");
     }
 
-    // 3. Renderiza a lista de produtos (agrupados por categoria)
     renderListItems(filteredItems);
-
-    // 4. Atualiza os contadores e a barra de progresso no topo
     updateStatistics();
 }
 
 function renderListItems(itemsList) {
     DOM.listContainer.innerHTML = "";
-    
-    // Agrupa os itens da lista atual pelas categorias reais
     const groupedItems = {};
     itemsList.forEach(item => {
-        if (!groupedItems[item.category]) {
-            groupedItems[item.category] = [];
-        }
+        if (!groupedItems[item.category]) groupedItems[item.category] = [];
         groupedItems[item.category].push(item);
     });
-
-    // Ordena as categorias alfabeticamente para um layout limpo
     const sortedCategories = Object.keys(groupedItems).sort();
-    
     sortedCategories.forEach(category => {
         const categoryBlock = document.createElement("div");
         categoryBlock.className = "category-group-block";
         categoryBlock.setAttribute("data-category", category);
-        
-        // Configura o cabeçalho do grupo de categoria
         const emoji = CATEGORIA_EMOJIS[category] || "📦";
         const totalItemsInGroup = groupedItems[category].length;
         const boughtItemsInGroup = groupedItems[category].filter(i => i.completed).length;
-        
         const catHeader = document.createElement("div");
         catHeader.className = "category-header";
         catHeader.innerHTML = `
@@ -785,81 +602,55 @@ function renderListItems(itemsList) {
             <span class="category-count">${boughtItemsInGroup}/${totalItemsInGroup}</span>
         `;
         categoryBlock.appendChild(catHeader);
-        
-        // Contentor para os cards
         const itemsListWrapper = document.createElement("div");
         itemsListWrapper.className = "category-items-list";
-        
-        // Cria cards individuais para cada item nesta categoria
         groupedItems[category].forEach(item => {
             const card = document.createElement("div");
-            card.className = `product-item-card ${item.completed ? 'completed' : ''}`;
-            
-            // Render de número formatado com unidade
+            card.className = `product-item-card ${item.completed ? "completed" : ""}`;
             const qtyText = `${item.quantity} ${item.unit}`;
-            
             card.innerHTML = `
                 <div class="card-left">
                     <label class="checkbox-wrapper">
-                        <input type="checkbox" ${item.completed ? 'checked' : ''} data-id="${item.id}" class="item-chk">
+                        <input type="checkbox" ${item.completed ? "checked" : ""} class="item-chk">
                         <span class="custom-checkbox">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
                         </span>
                     </label>
-                    <div class="item-details" data-id="${item.id}">
+                    <div class="item-details">
                         <span class="item-name" title="${item.name}">${item.name}</span>
                         <span class="item-qty">${qtyText}</span>
                     </div>
                 </div>
                 <div class="card-actions">
-                    <button class="action-btn btn-edit" data-id="${item.id}" aria-label="Editar item">
+                    <button class="action-btn btn-edit" aria-label="Editar item">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
                         </svg>
                     </button>
-                    <button class="action-btn btn-delete" data-id="${item.id}" aria-label="Eliminar item">
+                    <button class="action-btn btn-delete" aria-label="Eliminar item">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                         </svg>
                     </button>
                 </div>
             `;
-            
-            // Vincula ações específicas de conclusão nas áreas do card
-            const checkbox = card.querySelector(".item-chk");
-            checkbox.addEventListener("change", () => toggleItemCompleted(item.id));
-            
-            // Permite marcar clicando no nome e detalhes (experiência móvel facilitada)
-            const detailsArea = card.querySelector(".item-details");
-            detailsArea.addEventListener("click", () => toggleItemCompleted(item.id));
-            
-            // Botão Editar
-            const editBtn = card.querySelector(".btn-edit");
-            editBtn.addEventListener("click", (e) => {
+            card.querySelector(".item-chk").addEventListener("change", () => toggleItemCompleted(item.id));
+            card.querySelector(".item-details").addEventListener("click", () => toggleItemCompleted(item.id));
+            card.querySelector(".btn-edit").addEventListener("click", (e) => {
                 e.stopPropagation();
                 openEditModalWithData(item.id);
             });
-            
-            // Botão Eliminar com animação de slide-out e remoção do DOM
-            const deleteBtn = card.querySelector(".btn-delete");
-            deleteBtn.addEventListener("click", (e) => {
+            card.querySelector(".btn-delete").addEventListener("click", (e) => {
                 e.stopPropagation();
-                
-                // Transição de exclusão suave antes da eliminação física
                 card.style.transform = "translateX(100px)";
                 card.style.opacity = "0";
                 card.style.transition = "transform 0.3s ease, opacity 0.3s ease";
-                
-                setTimeout(() => {
-                    deleteItem(item.id);
-                }, 300);
+                setTimeout(() => deleteItem(item.id), 300);
             });
-
             itemsListWrapper.appendChild(card);
         });
-        
         categoryBlock.appendChild(itemsListWrapper);
         DOM.listContainer.appendChild(categoryBlock);
     });
@@ -868,57 +659,35 @@ function renderListItems(itemsList) {
 function updateStatistics() {
     const totalCount = state.items.length;
     const completedCount = state.items.filter(item => item.completed).length;
-    
-    // Contagem textual
     DOM.statsCounter.textContent = `${completedCount} de ${totalCount} itens`;
-    
-    // Percentagem textual
     const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
     DOM.statsPercentage.textContent = `${percentage}% comprado`;
-    
-    // Barra de progresso visual com lag natural na transição CSS
     DOM.statsProgressBar.style.width = `${percentage}%`;
-    
-    // Desativa ações globais se a lista estiver totalmente vazia
-    if (totalCount === 0) {
-        DOM.shareListBtn.disabled = true;
-        DOM.shareListBtn.style.opacity = "0.5";
-        DOM.shareListBtn.style.pointerEvents = "none";
-        
-        DOM.clearListBtn.disabled = true;
-        DOM.clearListBtn.style.opacity = "0.5";
-        DOM.clearListBtn.style.pointerEvents = "none";
-    } else {
-        DOM.shareListBtn.disabled = false;
-        DOM.shareListBtn.style.opacity = "1";
-        DOM.shareListBtn.style.pointerEvents = "auto";
-        
-        DOM.clearListBtn.disabled = false;
-        DOM.clearListBtn.style.opacity = "1";
-        DOM.clearListBtn.style.pointerEvents = "auto";
-    }
+    const hasItems = totalCount > 0;
+    DOM.shareListBtn.disabled = !hasItems;
+    DOM.shareListBtn.style.opacity = hasItems ? "1" : "0.5";
+    DOM.shareListBtn.style.pointerEvents = hasItems ? "auto" : "none";
+    DOM.clearListBtn.disabled = !hasItems;
+    DOM.clearListBtn.style.opacity = hasItems ? "1" : "0.5";
+    DOM.clearListBtn.style.pointerEvents = hasItems ? "auto" : "none";
 }
 
 // ==========================================================================
-// INTEGRAÇÃO DE SINCRONIZAÇÃO EM NUVEM (FASE 2)
-// API: ExtendsClass JSON Storage (sem conta, sem verificação de email)
+// SINCRONIZAÇÃO EM NUVEM
+// API: ExtendsClass JSON Storage — sem conta, sem verificação de email
 // ==========================================================================
 
 const CLOUD_API_BASE = "https://extendsclass.com/api/json-storage/bin/";
 
-// Configura a Sincronização em Nuvem na Inicialização
 function setupCloudSync() {
-    // 1. Procura se existe parâmetro ?lista=XXXXXX no URL (código = bin ID)
+    // Lê código da URL (?lista=XXXXXX) — tem prioridade sobre o localStorage
     const urlParams = new URLSearchParams(window.location.search);
     const listaParam = urlParams.get("lista");
-    
     if (listaParam) {
-        const cleanCode = listaParam.trim();
-        state.syncCode = cleanCode;
+        state.syncCode = listaParam.trim();
         saveState();
     }
-    
-    // 2. Se tivermos um código ativo, ativa a sincronização
+
     if (state.syncCode) {
         startCloudPolling();
         updateCloudUI(true);
@@ -927,16 +696,12 @@ function setupCloudSync() {
     }
 }
 
-// Inicia o Polling periódico (a cada 8 segundos)
 function startCloudPolling() {
     stopCloudPolling();
-    fetchCloudItems(); // Primeiro pull imediato
-    state.syncIntervalId = setInterval(() => {
-        fetchCloudItems();
-    }, 8000);
+    fetchCloudItems();
+    state.syncIntervalId = setInterval(fetchCloudItems, 8000);
 }
 
-// Para o Polling de sincronização
 function stopCloudPolling() {
     if (state.syncIntervalId) {
         clearInterval(state.syncIntervalId);
@@ -944,22 +709,14 @@ function stopCloudPolling() {
     }
 }
 
-// Atualiza o estado visual do painel de Sincronização
 function updateCloudUI(expand = false) {
     if (state.syncCode) {
-        // Modo Online
         DOM.syncDot.className = "sync-dot dot-online";
         DOM.syncStatusText.textContent = `Nuvem Ativa: ${state.syncCode}`;
         DOM.syncOfflineControls.classList.add("hidden");
         DOM.syncOnlineControls.classList.remove("hidden");
         DOM.activeListCode.textContent = state.syncCode;
-        
-        if (expand) {
-            DOM.syncExpandedContent.classList.remove("hidden");
-            DOM.toggleSyncPanelBtn.textContent = "Fechar Painel";
-        }
     } else {
-        // Modo Local
         DOM.syncDot.className = "sync-dot dot-offline";
         DOM.syncStatusText.textContent = "Lista Local (Apenas neste dispositivo)";
         DOM.syncOfflineControls.classList.remove("hidden");
@@ -967,429 +724,164 @@ function updateCloudUI(expand = false) {
         DOM.activeListCode.textContent = "------";
         DOM.joinListCode.value = "";
         DOM.joinInputWrapper.classList.add("hidden");
-        
-        if (expand) {
-            DOM.syncExpandedContent.classList.remove("hidden");
-            DOM.toggleSyncPanelBtn.textContent = "Fechar Painel";
-        }
+    }
+    if (expand) {
+        DOM.syncExpandedContent.classList.remove("hidden");
+        DOM.toggleSyncPanelBtn.textContent = "Fechar Painel";
     }
 }
 
-// Puxa (GET) os dados da nuvem
+// GET — puxa a lista da nuvem
 function fetchCloudItems() {
     if (!state.syncCode) return;
-    
+
     fetch(`${CLOUD_API_BASE}${state.syncCode}`)
         .then(response => {
-            if (!response.ok) throw new Error("Erro na rede: " + response.status);
+            if (!response.ok) throw new Error("HTTP " + response.status);
             return response.json();
         })
         .then(data => {
-            // ExtendsClass devolve { data: [...] } ou apenas o array diretamente
-            const cloudItems = Array.isArray(data) ? data : (data.data || []);
-            
+            // ExtendsClass devolve { data: [...] }
+            const cloudItems = Array.isArray(data) ? data : (Array.isArray(data.data) ? data.data : []);
+
             DOM.syncDot.className = "sync-dot dot-online";
             DOM.syncStatusText.textContent = `Nuvem Sincronizada: ${state.syncCode}`;
-            
-            // Só re-renderiza se houver diferenças
-            const localStr = JSON.stringify(state.items);
-            const cloudStr = JSON.stringify(cloudItems);
-            
-            if (localStr !== cloudStr) {
+
+            // Só re-renderiza se houver diferenças reais
+            if (JSON.stringify(state.items) !== JSON.stringify(cloudItems)) {
                 state.items = cloudItems;
                 localStorage.setItem("superlista_items", JSON.stringify(state.items));
                 render();
             }
         })
         .catch(err => {
-            console.warn("Sincronização falhou:", err.message);
+            console.warn("Sync falhou:", err.message);
             DOM.syncDot.className = "sync-dot dot-connecting";
             DOM.syncStatusText.textContent = `Ligação instável... (${state.syncCode})`;
         });
 }
 
-// Envia (PATCH) os dados para a nuvem
+// PATCH — envia alterações para a nuvem
 function pushCloudItems() {
     if (!state.syncCode) return;
-    
+
     DOM.syncDot.className = "sync-dot dot-connecting";
     DOM.syncStatusText.textContent = "A guardar na nuvem...";
-    
+
     fetch(`${CLOUD_API_BASE}${state.syncCode}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(state.items)
     })
     .then(response => {
-        if (!response.ok) throw new Error("Falha ao guardar: " + response.status);
+        if (!response.ok) throw new Error("HTTP " + response.status);
         DOM.syncDot.className = "sync-dot dot-online";
         DOM.syncStatusText.textContent = `Nuvem Sincronizada: ${state.syncCode}`;
     })
     .catch(err => {
-        console.error("Erro ao enviar para a nuvem:", err);
+        console.error("Falha ao enviar:", err);
         DOM.syncDot.className = "sync-dot dot-connecting";
         DOM.syncStatusText.textContent = `Erro a guardar... (${state.syncCode})`;
     });
 }
 
-// Cria uma nova lista na nuvem (POST para criar novo bin)
+// POST — cria um novo bin na API e obtém o ID único
 function generateAndCreateCloudList() {
     DOM.syncDot.className = "sync-dot dot-connecting";
     DOM.syncStatusText.textContent = "A criar lista na nuvem...";
     DOM.createCloudListBtn.disabled = true;
-    DOM.createCloudListBtn.textContent = "A criar...";
-    
-    // POST cria um novo bin e devolve o seu ID único
+    DOM.createCloudListBtn.querySelector("span").textContent = "A criar...";
+
     fetch("https://extendsclass.com/api/json-storage/bin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(state.items)
     })
     .then(response => {
-        if (!response.ok) throw new Error("Falha ao criar lista: " + response.status);
+        if (!response.ok) throw new Error("HTTP " + response.status);
         return response.json();
     })
     .then(result => {
-        // Extrai o ID do bin a partir do URI devolvido
-        // result.uri = "https://extendsclass.com/api/json-storage/bin/XXXXXXX"
+        // result = { status: 0, uri: "...bin/XXXXXXX", id: "XXXXXXX" }
         const binId = result.id || result.uri.split("/").pop();
-        
+
         state.syncCode = binId;
         saveState();
-        
         updateCloudUI(true);
-        
-        // Atualiza o URL da página sem fazer refresh
-        const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?lista=${binId}`;
-        window.history.pushState({ path: newUrl }, '', newUrl);
-        
-        showToast(`Lista Nuvem criada! Código: ${binId}`);
+
+        const newUrl = `${location.protocol}//${location.host}${location.pathname}?lista=${binId}`;
+        history.pushState({}, "", newUrl);
+
+        showToast(`Lista criada na Nuvem! Código: ${binId}`);
         startCloudPolling();
     })
     .catch(err => {
-        console.error("Erro ao criar lista na nuvem:", err);
+        console.error("Erro ao criar:", err);
         DOM.syncDot.className = "sync-dot dot-offline";
         DOM.syncStatusText.textContent = "Lista Local (Apenas neste dispositivo)";
         showToast("Erro ao criar lista na nuvem. Tente novamente.");
     })
     .finally(() => {
         DOM.createCloudListBtn.disabled = false;
-        DOM.createCloudListBtn.textContent = "Criar Lista na Nuvem";
+        DOM.createCloudListBtn.querySelector("span").textContent = "Criar Lista na Nuvem";
     });
 }
 
-// Liga-se a uma lista existente através do código inserido
+// Liga-se a uma lista existente pelo código/ID do bin
 function joinCloudList(code) {
     const cleanCode = code.trim();
     if (cleanCode.length < 5) {
-        showToast("Código inválido! Deve ter pelo menos 5 caracteres.");
+        showToast("Código inválido!");
         return;
     }
-    
+
     DOM.syncDot.className = "sync-dot dot-connecting";
     DOM.syncStatusText.textContent = "A carregar lista...";
-    
-    // Verifica se o bin existe antes de ligar
+
     fetch(`${CLOUD_API_BASE}${cleanCode}`)
         .then(response => {
-            if (!response.ok) throw new Error("Código de lista não encontrado.");
+            if (!response.ok) throw new Error("HTTP " + response.status);
             return response.json();
         })
         .then(data => {
-            const cloudItems = Array.isArray(data) ? data : (data.data || []);
-            
+            const cloudItems = Array.isArray(data) ? data : (Array.isArray(data.data) ? data.data : []);
+
             state.syncCode = cleanCode;
-            saveState();
-            
             state.items = cloudItems;
-            localStorage.setItem("superlista_items", JSON.stringify(state.items));
+            saveState();
             render();
-            
             updateCloudUI(true);
-            
-            // Atualiza o URL da página
-            const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?lista=${cleanCode}`;
-            window.history.pushState({ path: newUrl }, '', newUrl);
-            
+
+            const newUrl = `${location.protocol}//${location.host}${location.pathname}?lista=${cleanCode}`;
+            history.pushState({}, "", newUrl);
+
             showToast(`Ligado à lista: ${cleanCode}`);
             startCloudPolling();
         })
         .catch(err => {
-            console.error("Erro ao ligar à lista:", err);
+            console.error("Erro ao ligar:", err);
             DOM.syncDot.className = "sync-dot dot-offline";
             DOM.syncStatusText.textContent = "Lista Local (Apenas neste dispositivo)";
             showToast("Código não encontrado. Verifique e tente novamente.");
         });
 }
 
-// Desliga-se da nuvem e regressa ao modo local
+// Desliga a nuvem e regressa ao modo local
 function disconnectCloudSync() {
     stopCloudPolling();
     state.syncCode = null;
     saveState();
-    
-    const cleanUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
-    window.history.pushState({ path: cleanUrl }, '', cleanUrl);
-    
+    history.pushState({}, "", `${location.protocol}//${location.host}${location.pathname}`);
     updateCloudUI(false);
     render();
     showToast("Nuvem desativada. Lista local ativa.");
 }
 
-// Copia o Link de Partilha para a Área de Transferência
+// Copia o link de partilha para a área de transferência
 function copyCloudShareLink() {
     if (!state.syncCode) return;
-    
-    const shareUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?lista=${state.syncCode}`;
-    
+    const shareUrl = `${location.protocol}//${location.host}${location.pathname}?lista=${state.syncCode}`;
     navigator.clipboard.writeText(shareUrl)
         .then(() => showToast("Link de sincronização copiado!"))
         .catch(() => showToast("Erro ao copiar link."));
-}
-
-    
-    if (listaParam) {
-        const cleanCode = listaParam.trim().toLowerCase();
-        state.syncCode = cleanCode;
-        saveState();
-    }
-    
-    // 2. Se tivermos um código de sincronização ativo (via URL ou localStorage)
-    if (state.syncCode) {
-        startCloudPolling();
-        updateCloudUI(true); // Abre o painel expandido se estiver ativo
-    } else {
-        updateCloudUI(false);
-    }
-}
-
-// Inicia o Polling periódico (a cada 6 segundos) para sincronização automática
-function startCloudPolling() {
-    stopCloudPolling(); // Garante que limpamos qualquer outro polling primeiro
-    
-    // Executa imediatamente o primeiro pull
-    fetchCloudItems();
-    
-    // Configura o intervalo recorrente
-    state.syncIntervalId = setInterval(() => {
-        fetchCloudItems();
-    }, 6000);
-}
-
-// Para o Polling de sincronização
-function stopCloudPolling() {
-    if (state.syncIntervalId) {
-        clearInterval(state.syncIntervalId);
-        state.syncIntervalId = null;
-    }
-}
-
-// Atualiza o estado visual do painel de Sincronização
-function updateCloudUI(expand = false) {
-    if (state.syncCode) {
-        // Modo Online (Sincronizado)
-        DOM.syncDot.className = "sync-dot dot-online";
-        DOM.syncStatusText.textContent = `Nuvem Ativa: ${state.syncCode}`;
-        
-        DOM.syncOfflineControls.classList.add("hidden");
-        DOM.syncOnlineControls.classList.remove("hidden");
-        
-        DOM.activeListCode.textContent = state.syncCode;
-        
-        if (expand) {
-            DOM.syncExpandedContent.classList.remove("hidden");
-            DOM.toggleSyncPanelBtn.textContent = "Fechar Painel";
-        }
-    } else {
-        // Modo Offline (Local)
-        DOM.syncDot.className = "sync-dot dot-offline";
-        DOM.syncStatusText.textContent = "Lista Local (Apenas neste dispositivo)";
-        
-        DOM.syncOfflineControls.classList.remove("hidden");
-        DOM.syncOnlineControls.classList.add("hidden");
-        
-        DOM.activeListCode.textContent = "------";
-        DOM.joinListCode.value = "";
-        DOM.joinInputWrapper.classList.add("hidden");
-        
-        if (expand) {
-            DOM.syncExpandedContent.classList.remove("hidden");
-            DOM.toggleSyncPanelBtn.textContent = "Fechar Painel";
-        }
-    }
-}
-
-// Puxa (GET) os dados da nuvem
-function fetchCloudItems() {
-    if (!state.syncCode) return;
-    
-    // Se for o primeiro pull, podemos mostrar ligando...
-    if (DOM.syncDot.className.includes("dot-offline")) {
-        DOM.syncDot.className = "sync-dot dot-connecting";
-        DOM.syncStatusText.textContent = "A ligar à nuvem...";
-    }
-    
-    fetch(`${CLOUD_API_BASE}${state.syncCode}`)
-        .then(response => {
-            if (response.status === 404) {
-                // O código da lista existe localmente mas ainda não foi criado na nuvem
-                // Fazemos o primeiro upload automático
-                pushCloudItems();
-                return null;
-            }
-            if (!response.ok) {
-                throw new Error("Erro na rede");
-            }
-            return response.json();
-        })
-        .then(cloudItems => {
-            if (!cloudItems) return;
-            
-            // Define o estado visual como ativo e sincronizado
-            DOM.syncDot.className = "sync-dot dot-online";
-            DOM.syncStatusText.textContent = `Nuvem Sincronizada: ${state.syncCode}`;
-            
-            // Só atualiza os itens locais se houver diferenças reais
-            const localStr = JSON.stringify(state.items);
-            const cloudStr = JSON.stringify(cloudItems);
-            
-            if (localStr !== cloudStr) {
-                state.items = cloudItems;
-                localStorage.setItem("superlista_items", JSON.stringify(state.items));
-                render();
-            }
-        })
-        .catch(err => {
-            console.warn("Sincronização em nuvem offline:", err.message);
-            DOM.syncDot.className = "sync-dot dot-connecting";
-            DOM.syncStatusText.textContent = `Ligação instável... (${state.syncCode})`;
-        });
-}
-
-// Envia (PUT) os dados para a nuvem
-function pushCloudItems() {
-    if (!state.syncCode) return;
-    
-    DOM.syncDot.className = "sync-dot dot-connecting";
-    DOM.syncStatusText.textContent = "A guardar na nuvem...";
-    
-    fetch(`${CLOUD_API_BASE}${state.syncCode}`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(state.items)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Falha ao guardar na nuvem");
-        }
-        DOM.syncDot.className = "sync-dot dot-online";
-        DOM.syncStatusText.textContent = `Nuvem Sincronizada: ${state.syncCode}`;
-    })
-    .catch(err => {
-        console.error("Erro ao enviar dados para a nuvem:", err);
-        DOM.syncDot.className = "sync-dot dot-connecting";
-        DOM.syncStatusText.textContent = `Erro a guardar... (${state.syncCode})`;
-    });
-}
-
-// Cria uma nova lista gerando um código aleatório de 6 caracteres
-function generateAndCreateCloudList() {
-    // Gera código simples de 6 caracteres (ex: 3b4f9e)
-    const code = Math.random().toString(36).substring(2, 8).toLowerCase();
-    
-    state.syncCode = code;
-    saveState();
-    
-    // Atualiza o painel visual
-    updateCloudUI(true);
-    
-    // Faz o upload dos produtos que o utilizador já tem criados localmente
-    pushCloudItems();
-    
-    // Atualiza o URL da página sem fazer refresh
-    const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?lista=${code}`;
-    window.history.pushState({ path: newUrl }, '', newUrl);
-    
-    showToast(`Lista Nuvem criada: ${code}`);
-    startCloudPolling();
-}
-
-// Liga-se a uma lista existente através do código inserido
-function joinCloudList(code) {
-    const cleanCode = code.trim().toLowerCase();
-    if (cleanCode.length < 3) {
-        showToast("Código demasiado curto!");
-        return;
-    }
-    
-    state.syncCode = cleanCode;
-    saveState();
-    
-    // Atualiza a interface
-    updateCloudUI(true);
-    
-    DOM.syncDot.className = "sync-dot dot-connecting";
-    DOM.syncStatusText.textContent = "A carregar lista...";
-    
-    // Atualiza o URL da página
-    const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?lista=${cleanCode}`;
-    window.history.pushState({ path: newUrl }, '', newUrl);
-    
-    // Efetua o puxamento inicial de dados
-    fetch(`${CLOUD_API_BASE}${cleanCode}`)
-        .then(response => {
-            if (response.status === 404) {
-                // Se a lista remota não existir, criamos com os dados locais
-                pushCloudItems();
-                return state.items;
-            }
-            return response.json();
-        })
-        .then(cloudItems => {
-            state.items = cloudItems || [];
-            localStorage.setItem("superlista_items", JSON.stringify(state.items));
-            render();
-            showToast(`Ligado à lista: ${cleanCode}`);
-            startCloudPolling();
-        })
-        .catch(err => {
-            console.error("Erro ao ligar a lista:", err);
-            showToast("Falha ao descarregar a lista.");
-            startCloudPolling();
-        });
-}
-
-// Desliga-se da nuvem e regressa ao modo de armazenamento exclusivamente local
-function disconnectCloudSync() {
-    stopCloudPolling();
-    
-    state.syncCode = null;
-    saveState();
-    
-    // Limpa o parâmetro URL
-    const cleanUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
-    window.history.pushState({ path: cleanUrl }, '', cleanUrl);
-    
-    updateCloudUI(false);
-    render();
-    
-    showToast("Nuvem desativada. Lista local ativa.");
-}
-
-// Copia o Link Completo de Partilha para a Área de Transferência
-function copyCloudShareLink() {
-    if (!state.syncCode) return;
-    
-    const shareUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?lista=${state.syncCode}`;
-    
-    navigator.clipboard.writeText(shareUrl)
-        .then(() => {
-            showToast("Link de sincronização copiado!");
-        })
-        .catch(err => {
-            console.error("Falha ao copiar:", err);
-            showToast("Erro ao copiar link.");
-        });
 }
