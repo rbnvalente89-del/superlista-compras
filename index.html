@@ -53,8 +53,55 @@
                 <div class="progress-bar-container">
                     <div id="stats-progress-bar" class="progress-bar" style="width: 0%"></div>
                 </div>
-            </div>
         </header>
+
+        <!-- PAINEL DE SINCRONIZAÇÃO EM NUVEM (FASE 2) -->
+        <section class="sync-section">
+            <div id="sync-panel" class="glass-panel sync-panel">
+                <div class="sync-status-row">
+                    <div class="sync-indicator">
+                        <span id="sync-dot" class="sync-dot dot-offline"></span>
+                        <span id="sync-status-text" class="sync-status-text">Lista Local (Apenas neste dispositivo)</span>
+                    </div>
+                    <div class="sync-actions-wrapper">
+                        <button type="button" id="toggle-sync-panel-btn" class="sync-text-btn">Configurar Nuvem</button>
+                    </div>
+                </div>
+                
+                <!-- Conteúdo de configuração expansível (escondido por padrão) -->
+                <div id="sync-expanded-content" class="sync-expanded hidden">
+                    <div class="sync-divider"></div>
+                    <div id="sync-offline-controls" class="sync-controls">
+                        <p class="sync-info">Crie uma lista na nuvem para partilhar com o seu telemóvel ou outros dispositivos.</p>
+                        <div class="sync-buttons-row">
+                            <button type="button" id="create-cloud-list-btn" class="btn btn-primary btn-sm">
+                                <span>Criar Lista na Nuvem</span>
+                            </button>
+                            <button type="button" id="show-join-input-btn" class="btn btn-secondary btn-sm">
+                                <span>Aceder a Lista Existente</span>
+                            </button>
+                        </div>
+                        <div id="join-input-wrapper" class="join-input-wrapper hidden">
+                            <input type="text" id="join-list-code" placeholder="Introduzir código de 6 digitos (ex: a7d2f9)">
+                            <button type="button" id="confirm-join-btn" class="btn btn-primary btn-sm">Ligar</button>
+                        </div>
+                    </div>
+                    
+                    <div id="sync-online-controls" class="sync-controls hidden">
+                        <p class="sync-info">Esta lista está a ser sincronizada em tempo real noutros dispositivos com este código:</p>
+                        <div class="code-share-box">
+                            <span id="active-list-code" class="active-list-code">------</span>
+                            <button type="button" id="copy-share-link-btn" class="action-btn" title="Copiar Link de Sincronização">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0A2.25 2.25 0 0 1 13.5 5.25h-3a2.25 2.25 0 0 1-2.166-1.612m7.332 0c.008.09.014.18.016.272V18a2.25 2.25 0 0 1-2.25 2.25h-9A2.25 2.25 0 0 1 2.25 18V3.91a2.25 2.25 0 0 1 .016-.272m12.9 12.182-1.72 1.72a.75.75 0 0 1-1.06 0l-.86-.86m0 0a.75.75 0 0 1 1.06-1.06l.33.33 1.19-1.19a.75.75 0 1 1 1.06 1.06Zm-11.666-8h11.25m-11.25 3.75h11.25m-11.25 3.75h4.875" />
+                                </svg>
+                            </button>
+                        </div>
+                        <button type="button" id="disconnect-sync-btn" class="btn btn-secondary btn-sm w-full">Voltar à Lista Local</button>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- FORMULÁRIO DE ADIÇÃO DE PRODUTOS -->
         <section class="form-section">

@@ -151,7 +151,10 @@ let state = {
         status: "all",      // 'all', 'pending', 'completed'
         category: "all",    // 'all' ou nome específico da categoria
         search: ""          // string de pesquisa
-    }
+    },
+    syncCode: null,
+    isSyncing: false,
+    syncIntervalId: null
 };
 
 // ==========================================================================
@@ -212,7 +215,23 @@ const DOM = {
     
     // Toast Notificação
     toast: document.getElementById("toast-notification"),
-    toastMsg: document.getElementById("toast-message")
+    toastMsg: document.getElementById("toast-message"),
+    
+    // Nuvem (Fase 2)
+    syncDot: document.getElementById("sync-dot"),
+    syncStatusText: document.getElementById("sync-status-text"),
+    toggleSyncPanelBtn: document.getElementById("toggle-sync-panel-btn"),
+    syncExpandedContent: document.getElementById("sync-expanded-content"),
+    syncOfflineControls: document.getElementById("sync-offline-controls"),
+    createCloudListBtn: document.getElementById("create-cloud-list-btn"),
+    showJoinInputBtn: document.getElementById("show-join-input-btn"),
+    joinInputWrapper: document.getElementById("join-input-wrapper"),
+    joinListCode: document.getElementById("join-list-code"),
+    confirmJoinBtn: document.getElementById("confirm-join-btn"),
+    syncOnlineControls: document.getElementById("sync-online-controls"),
+    activeListCode: document.getElementById("active-list-code"),
+    copyShareLinkBtn: document.getElementById("copy-share-link-btn"),
+    disconnectSyncBtn: document.getElementById("disconnect-sync-btn")
 };
 
 // ==========================================================================
@@ -223,6 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadState();
     setupTheme();
     setupEventListeners();
+    setupCloudSync();
     render();
 });
 
@@ -230,6 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function loadState() {
     const savedItems = localStorage.getItem("superlista_items");
     const savedTheme = localStorage.getItem("superlista_theme");
+    const savedSyncCode = localStorage.getItem("superlista_synccode");
     
     if (savedItems) {
         state.items = JSON.parse(savedItems);
@@ -251,12 +272,21 @@ function loadState() {
         const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
         state.theme = prefersDark ? "dark" : "light";
     }
+
+    if (savedSyncCode) {
+        state.syncCode = savedSyncCode;
+    }
 }
 
 // Guarda o estado no LocalStorage
 function saveState() {
     localStorage.setItem("superlista_items", JSON.stringify(state.items));
     localStorage.setItem("superlista_theme", state.theme);
+    if (state.syncCode) {
+        localStorage.setItem("superlista_synccode", state.syncCode);
+    } else {
+        localStorage.removeItem("superlista_synccode");
+    }
 }
 
 // Configura o tema inicial na página
@@ -404,6 +434,35 @@ function setupEventListeners() {
         clearList();
         DOM.clearModal.classList.add("hidden");
     });
+
+    // Nuvem (Fase 2) Event Listeners
+    DOM.toggleSyncPanelBtn.addEventListener("click", () => {
+        DOM.syncExpandedContent.classList.toggle("hidden");
+        DOM.toggleSyncPanelBtn.textContent = DOM.syncExpandedContent.classList.contains("hidden") ? "Configurar Nuvem" : "Fechar Painel";
+    });
+    
+    DOM.showJoinInputBtn.addEventListener("click", () => {
+        DOM.joinInputWrapper.classList.toggle("hidden");
+    });
+    
+    DOM.createCloudListBtn.addEventListener("click", () => {
+        generateAndCreateCloudList();
+    });
+    
+    DOM.confirmJoinBtn.addEventListener("click", () => {
+        const code = DOM.joinListCode.value.trim().toLowerCase();
+        if (code) {
+            joinCloudList(code);
+        }
+    });
+    
+    DOM.copyShareLinkBtn.addEventListener("click", () => {
+        copyCloudShareLink();
+    });
+    
+    DOM.disconnectSyncBtn.addEventListener("click", () => {
+        disconnectCloudSync();
+    });
 }
 
 // Configura eventos para os botões de filtro de categoria dinâmicos
@@ -515,6 +574,7 @@ function addItem(name, quantity, unit, category) {
     saveState();
     render();
     showToast(`Adicionado: ${name}`);
+    pushCloudItems();
 }
 
 // Edita / Atualiza um item
@@ -527,6 +587,7 @@ function updateItem(id, name, quantity, unit, category) {
     });
     saveState();
     render();
+    pushCloudItems();
 }
 
 // Alterna estado de conclusão (comprado)
@@ -541,6 +602,7 @@ function toggleItemCompleted(id) {
     });
     saveState();
     render();
+    pushCloudItems();
 }
 
 // Elimina um item individual
@@ -552,6 +614,7 @@ function deleteItem(id) {
     if (itemToDelete) {
         showToast(`Removido: ${itemToDelete.name}`);
     }
+    pushCloudItems();
 }
 
 // Limpa toda a lista de compras
@@ -560,6 +623,7 @@ function clearList() {
     saveState();
     render();
     showToast("A lista de compras foi limpa.");
+    pushCloudItems();
 }
 
 // ==========================================================================
@@ -833,4 +897,262 @@ function updateStatistics() {
         DOM.clearListBtn.style.opacity = "1";
         DOM.clearListBtn.style.pointerEvents = "auto";
     }
+}
+
+// ==========================================================================
+// INTEGRAÇÃO DE SINCRONIZAÇÃO EM NUVEM (FASE 2)
+// ==========================================================================
+
+const CLOUD_API_BASE = "https://kvdb.io/pS84FmK9D2s7H5r3/";
+
+// Configura a Sincronização em Nuvem na Inicialização
+function setupCloudSync() {
+    // 1. Procura se existe parâmetro ?lista=XXXXXX no URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const listaParam = urlParams.get("lista");
+    
+    if (listaParam) {
+        const cleanCode = listaParam.trim().toLowerCase();
+        state.syncCode = cleanCode;
+        saveState();
+    }
+    
+    // 2. Se tivermos um código de sincronização ativo (via URL ou localStorage)
+    if (state.syncCode) {
+        startCloudPolling();
+        updateCloudUI(true); // Abre o painel expandido se estiver ativo
+    } else {
+        updateCloudUI(false);
+    }
+}
+
+// Inicia o Polling periódico (a cada 6 segundos) para sincronização automática
+function startCloudPolling() {
+    stopCloudPolling(); // Garante que limpamos qualquer outro polling primeiro
+    
+    // Executa imediatamente o primeiro pull
+    fetchCloudItems();
+    
+    // Configura o intervalo recorrente
+    state.syncIntervalId = setInterval(() => {
+        fetchCloudItems();
+    }, 6000);
+}
+
+// Para o Polling de sincronização
+function stopCloudPolling() {
+    if (state.syncIntervalId) {
+        clearInterval(state.syncIntervalId);
+        state.syncIntervalId = null;
+    }
+}
+
+// Atualiza o estado visual do painel de Sincronização
+function updateCloudUI(expand = false) {
+    if (state.syncCode) {
+        // Modo Online (Sincronizado)
+        DOM.syncDot.className = "sync-dot dot-online";
+        DOM.syncStatusText.textContent = `Nuvem Ativa: ${state.syncCode}`;
+        
+        DOM.syncOfflineControls.classList.add("hidden");
+        DOM.syncOnlineControls.classList.remove("hidden");
+        
+        DOM.activeListCode.textContent = state.syncCode;
+        
+        if (expand) {
+            DOM.syncExpandedContent.classList.remove("hidden");
+            DOM.toggleSyncPanelBtn.textContent = "Fechar Painel";
+        }
+    } else {
+        // Modo Offline (Local)
+        DOM.syncDot.className = "sync-dot dot-offline";
+        DOM.syncStatusText.textContent = "Lista Local (Apenas neste dispositivo)";
+        
+        DOM.syncOfflineControls.classList.remove("hidden");
+        DOM.syncOnlineControls.classList.add("hidden");
+        
+        DOM.activeListCode.textContent = "------";
+        DOM.joinListCode.value = "";
+        DOM.joinInputWrapper.classList.add("hidden");
+        
+        if (expand) {
+            DOM.syncExpandedContent.classList.remove("hidden");
+            DOM.toggleSyncPanelBtn.textContent = "Fechar Painel";
+        }
+    }
+}
+
+// Puxa (GET) os dados da nuvem
+function fetchCloudItems() {
+    if (!state.syncCode) return;
+    
+    // Se for o primeiro pull, podemos mostrar ligando...
+    if (DOM.syncDot.className.includes("dot-offline")) {
+        DOM.syncDot.className = "sync-dot dot-connecting";
+        DOM.syncStatusText.textContent = "A ligar à nuvem...";
+    }
+    
+    fetch(`${CLOUD_API_BASE}${state.syncCode}`)
+        .then(response => {
+            if (response.status === 404) {
+                // O código da lista existe localmente mas ainda não foi criado na nuvem
+                // Fazemos o primeiro upload automático
+                pushCloudItems();
+                return null;
+            }
+            if (!response.ok) {
+                throw new Error("Erro na rede");
+            }
+            return response.json();
+        })
+        .then(cloudItems => {
+            if (!cloudItems) return;
+            
+            // Define o estado visual como ativo e sincronizado
+            DOM.syncDot.className = "sync-dot dot-online";
+            DOM.syncStatusText.textContent = `Nuvem Sincronizada: ${state.syncCode}`;
+            
+            // Só atualiza os itens locais se houver diferenças reais
+            const localStr = JSON.stringify(state.items);
+            const cloudStr = JSON.stringify(cloudItems);
+            
+            if (localStr !== cloudStr) {
+                state.items = cloudItems;
+                localStorage.setItem("superlista_items", JSON.stringify(state.items));
+                render();
+            }
+        })
+        .catch(err => {
+            console.warn("Sincronização em nuvem offline:", err.message);
+            DOM.syncDot.className = "sync-dot dot-connecting";
+            DOM.syncStatusText.textContent = `Ligação instável... (${state.syncCode})`;
+        });
+}
+
+// Envia (PUT) os dados para a nuvem
+function pushCloudItems() {
+    if (!state.syncCode) return;
+    
+    DOM.syncDot.className = "sync-dot dot-connecting";
+    DOM.syncStatusText.textContent = "A guardar na nuvem...";
+    
+    fetch(`${CLOUD_API_BASE}${state.syncCode}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(state.items)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Falha ao guardar na nuvem");
+        }
+        DOM.syncDot.className = "sync-dot dot-online";
+        DOM.syncStatusText.textContent = `Nuvem Sincronizada: ${state.syncCode}`;
+    })
+    .catch(err => {
+        console.error("Erro ao enviar dados para a nuvem:", err);
+        DOM.syncDot.className = "sync-dot dot-connecting";
+        DOM.syncStatusText.textContent = `Erro a guardar... (${state.syncCode})`;
+    });
+}
+
+// Cria uma nova lista gerando um código aleatório de 6 caracteres
+function generateAndCreateCloudList() {
+    // Gera código simples de 6 caracteres (ex: 3b4f9e)
+    const code = Math.random().toString(36).substring(2, 8).toLowerCase();
+    
+    state.syncCode = code;
+    saveState();
+    
+    // Atualiza o painel visual
+    updateCloudUI(true);
+    
+    // Faz o upload dos produtos que o utilizador já tem criados localmente
+    pushCloudItems();
+    
+    // Atualiza o URL da página sem fazer refresh
+    const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?lista=${code}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+    
+    showToast(`Lista Nuvem criada: ${code}`);
+    startCloudPolling();
+}
+
+// Liga-se a uma lista existente através do código inserido
+function joinCloudList(code) {
+    const cleanCode = code.trim().toLowerCase();
+    if (cleanCode.length < 3) {
+        showToast("Código demasiado curto!");
+        return;
+    }
+    
+    state.syncCode = cleanCode;
+    saveState();
+    
+    // Atualiza a interface
+    updateCloudUI(true);
+    
+    DOM.syncDot.className = "sync-dot dot-connecting";
+    DOM.syncStatusText.textContent = "A carregar lista...";
+    
+    // Atualiza o URL da página
+    const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?lista=${cleanCode}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+    
+    // Efetua o puxamento inicial de dados
+    fetch(`${CLOUD_API_BASE}${cleanCode}`)
+        .then(response => {
+            if (response.status === 404) {
+                // Se a lista remota não existir, criamos com os dados locais
+                pushCloudItems();
+                return state.items;
+            }
+            return response.json();
+        })
+        .then(cloudItems => {
+            state.items = cloudItems || [];
+            localStorage.setItem("superlista_items", JSON.stringify(state.items));
+            render();
+            showToast(`Ligado à lista: ${cleanCode}`);
+            startCloudPolling();
+        })
+        .catch(err => {
+            console.error("Erro ao ligar a lista:", err);
+            showToast("Falha ao descarregar a lista.");
+            startCloudPolling();
+        });
+}
+
+// Desliga-se da nuvem e regressa ao modo de armazenamento exclusivamente local
+function disconnectCloudSync() {
+    stopCloudPolling();
+    
+    state.syncCode = null;
+    saveState();
+    
+    // Limpa o parâmetro URL
+    const cleanUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
+    window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+    
+    updateCloudUI(false);
+    render();
+    
+    showToast("Nuvem desativada. Lista local ativa.");
+}
+
+// Copia o Link Completo de Partilha para a Área de Transferência
+function copyCloudShareLink() {
+    if (!state.syncCode) return;
+    
+    const shareUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?lista=${state.syncCode}`;
+    
+    navigator.clipboard.writeText(shareUrl)
+        .then(() => {
+            showToast("Link de sincronização copiado!");
+        })
+        .catch(err => {
+            console.error("Falha ao copiar:", err);
+            showToast("Erro ao copiar link.");
+        });
 }
