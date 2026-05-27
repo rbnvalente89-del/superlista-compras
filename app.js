@@ -901,15 +901,252 @@ function updateStatistics() {
 
 // ==========================================================================
 // INTEGRAÇÃO DE SINCRONIZAÇÃO EM NUVEM (FASE 2)
+// API: ExtendsClass JSON Storage (sem conta, sem verificação de email)
 // ==========================================================================
 
-const CLOUD_API_BASE = "https://kvdb.io/pS84FmK9D2s7H5r3/";
+const CLOUD_API_BASE = "https://extendsclass.com/api/json-storage/bin/";
 
 // Configura a Sincronização em Nuvem na Inicialização
 function setupCloudSync() {
-    // 1. Procura se existe parâmetro ?lista=XXXXXX no URL
+    // 1. Procura se existe parâmetro ?lista=XXXXXX no URL (código = bin ID)
     const urlParams = new URLSearchParams(window.location.search);
     const listaParam = urlParams.get("lista");
+    
+    if (listaParam) {
+        const cleanCode = listaParam.trim();
+        state.syncCode = cleanCode;
+        saveState();
+    }
+    
+    // 2. Se tivermos um código ativo, ativa a sincronização
+    if (state.syncCode) {
+        startCloudPolling();
+        updateCloudUI(true);
+    } else {
+        updateCloudUI(false);
+    }
+}
+
+// Inicia o Polling periódico (a cada 8 segundos)
+function startCloudPolling() {
+    stopCloudPolling();
+    fetchCloudItems(); // Primeiro pull imediato
+    state.syncIntervalId = setInterval(() => {
+        fetchCloudItems();
+    }, 8000);
+}
+
+// Para o Polling de sincronização
+function stopCloudPolling() {
+    if (state.syncIntervalId) {
+        clearInterval(state.syncIntervalId);
+        state.syncIntervalId = null;
+    }
+}
+
+// Atualiza o estado visual do painel de Sincronização
+function updateCloudUI(expand = false) {
+    if (state.syncCode) {
+        // Modo Online
+        DOM.syncDot.className = "sync-dot dot-online";
+        DOM.syncStatusText.textContent = `Nuvem Ativa: ${state.syncCode}`;
+        DOM.syncOfflineControls.classList.add("hidden");
+        DOM.syncOnlineControls.classList.remove("hidden");
+        DOM.activeListCode.textContent = state.syncCode;
+        
+        if (expand) {
+            DOM.syncExpandedContent.classList.remove("hidden");
+            DOM.toggleSyncPanelBtn.textContent = "Fechar Painel";
+        }
+    } else {
+        // Modo Local
+        DOM.syncDot.className = "sync-dot dot-offline";
+        DOM.syncStatusText.textContent = "Lista Local (Apenas neste dispositivo)";
+        DOM.syncOfflineControls.classList.remove("hidden");
+        DOM.syncOnlineControls.classList.add("hidden");
+        DOM.activeListCode.textContent = "------";
+        DOM.joinListCode.value = "";
+        DOM.joinInputWrapper.classList.add("hidden");
+        
+        if (expand) {
+            DOM.syncExpandedContent.classList.remove("hidden");
+            DOM.toggleSyncPanelBtn.textContent = "Fechar Painel";
+        }
+    }
+}
+
+// Puxa (GET) os dados da nuvem
+function fetchCloudItems() {
+    if (!state.syncCode) return;
+    
+    fetch(`${CLOUD_API_BASE}${state.syncCode}`)
+        .then(response => {
+            if (!response.ok) throw new Error("Erro na rede: " + response.status);
+            return response.json();
+        })
+        .then(data => {
+            // ExtendsClass devolve { data: [...] } ou apenas o array diretamente
+            const cloudItems = Array.isArray(data) ? data : (data.data || []);
+            
+            DOM.syncDot.className = "sync-dot dot-online";
+            DOM.syncStatusText.textContent = `Nuvem Sincronizada: ${state.syncCode}`;
+            
+            // Só re-renderiza se houver diferenças
+            const localStr = JSON.stringify(state.items);
+            const cloudStr = JSON.stringify(cloudItems);
+            
+            if (localStr !== cloudStr) {
+                state.items = cloudItems;
+                localStorage.setItem("superlista_items", JSON.stringify(state.items));
+                render();
+            }
+        })
+        .catch(err => {
+            console.warn("Sincronização falhou:", err.message);
+            DOM.syncDot.className = "sync-dot dot-connecting";
+            DOM.syncStatusText.textContent = `Ligação instável... (${state.syncCode})`;
+        });
+}
+
+// Envia (PATCH) os dados para a nuvem
+function pushCloudItems() {
+    if (!state.syncCode) return;
+    
+    DOM.syncDot.className = "sync-dot dot-connecting";
+    DOM.syncStatusText.textContent = "A guardar na nuvem...";
+    
+    fetch(`${CLOUD_API_BASE}${state.syncCode}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(state.items)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Falha ao guardar: " + response.status);
+        DOM.syncDot.className = "sync-dot dot-online";
+        DOM.syncStatusText.textContent = `Nuvem Sincronizada: ${state.syncCode}`;
+    })
+    .catch(err => {
+        console.error("Erro ao enviar para a nuvem:", err);
+        DOM.syncDot.className = "sync-dot dot-connecting";
+        DOM.syncStatusText.textContent = `Erro a guardar... (${state.syncCode})`;
+    });
+}
+
+// Cria uma nova lista na nuvem (POST para criar novo bin)
+function generateAndCreateCloudList() {
+    DOM.syncDot.className = "sync-dot dot-connecting";
+    DOM.syncStatusText.textContent = "A criar lista na nuvem...";
+    DOM.createCloudListBtn.disabled = true;
+    DOM.createCloudListBtn.textContent = "A criar...";
+    
+    // POST cria um novo bin e devolve o seu ID único
+    fetch("https://extendsclass.com/api/json-storage/bin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(state.items)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Falha ao criar lista: " + response.status);
+        return response.json();
+    })
+    .then(result => {
+        // Extrai o ID do bin a partir do URI devolvido
+        // result.uri = "https://extendsclass.com/api/json-storage/bin/XXXXXXX"
+        const binId = result.id || result.uri.split("/").pop();
+        
+        state.syncCode = binId;
+        saveState();
+        
+        updateCloudUI(true);
+        
+        // Atualiza o URL da página sem fazer refresh
+        const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?lista=${binId}`;
+        window.history.pushState({ path: newUrl }, '', newUrl);
+        
+        showToast(`Lista Nuvem criada! Código: ${binId}`);
+        startCloudPolling();
+    })
+    .catch(err => {
+        console.error("Erro ao criar lista na nuvem:", err);
+        DOM.syncDot.className = "sync-dot dot-offline";
+        DOM.syncStatusText.textContent = "Lista Local (Apenas neste dispositivo)";
+        showToast("Erro ao criar lista na nuvem. Tente novamente.");
+    })
+    .finally(() => {
+        DOM.createCloudListBtn.disabled = false;
+        DOM.createCloudListBtn.textContent = "Criar Lista na Nuvem";
+    });
+}
+
+// Liga-se a uma lista existente através do código inserido
+function joinCloudList(code) {
+    const cleanCode = code.trim();
+    if (cleanCode.length < 5) {
+        showToast("Código inválido! Deve ter pelo menos 5 caracteres.");
+        return;
+    }
+    
+    DOM.syncDot.className = "sync-dot dot-connecting";
+    DOM.syncStatusText.textContent = "A carregar lista...";
+    
+    // Verifica se o bin existe antes de ligar
+    fetch(`${CLOUD_API_BASE}${cleanCode}`)
+        .then(response => {
+            if (!response.ok) throw new Error("Código de lista não encontrado.");
+            return response.json();
+        })
+        .then(data => {
+            const cloudItems = Array.isArray(data) ? data : (data.data || []);
+            
+            state.syncCode = cleanCode;
+            saveState();
+            
+            state.items = cloudItems;
+            localStorage.setItem("superlista_items", JSON.stringify(state.items));
+            render();
+            
+            updateCloudUI(true);
+            
+            // Atualiza o URL da página
+            const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?lista=${cleanCode}`;
+            window.history.pushState({ path: newUrl }, '', newUrl);
+            
+            showToast(`Ligado à lista: ${cleanCode}`);
+            startCloudPolling();
+        })
+        .catch(err => {
+            console.error("Erro ao ligar à lista:", err);
+            DOM.syncDot.className = "sync-dot dot-offline";
+            DOM.syncStatusText.textContent = "Lista Local (Apenas neste dispositivo)";
+            showToast("Código não encontrado. Verifique e tente novamente.");
+        });
+}
+
+// Desliga-se da nuvem e regressa ao modo local
+function disconnectCloudSync() {
+    stopCloudPolling();
+    state.syncCode = null;
+    saveState();
+    
+    const cleanUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
+    window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+    
+    updateCloudUI(false);
+    render();
+    showToast("Nuvem desativada. Lista local ativa.");
+}
+
+// Copia o Link de Partilha para a Área de Transferência
+function copyCloudShareLink() {
+    if (!state.syncCode) return;
+    
+    const shareUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?lista=${state.syncCode}`;
+    
+    navigator.clipboard.writeText(shareUrl)
+        .then(() => showToast("Link de sincronização copiado!"))
+        .catch(() => showToast("Erro ao copiar link."));
+}
+
     
     if (listaParam) {
         const cleanCode = listaParam.trim().toLowerCase();
