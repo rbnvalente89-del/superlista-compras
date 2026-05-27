@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lista de Compras Premium</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <meta name="theme-color" content="#10b981">
+    <!-- Meta tags de PWA básicas para adicionar ao ecrã principal -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body class="theme-light">
+    <div class="app-container">
+        <!-- HEADER COM APRESENTAÇÃO E ESTATÍSTICAS -->
+        <header class="app-header">
+            <div class="header-main">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1>SuperLista</h1>
+                        <p class="subtitle">A sua lista inteligente</p>
+                    </div>
+                </div>
+                
+                <!-- TEMA TOGGLE -->
+                <button id="theme-toggle-btn" class="icon-btn" aria-label="Alterar Tema">
+                    <!-- Sol -->
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21M9.75 15h.008v.008H9.75V15Zm0-6h.008v.008H9.75V9Zm6 6h.008v.008h-.008V15Zm0-6h.008v.008h-.008V9ZM4.736 6.244l1.59 1.59m11.362 11.362 1.591 1.59M21 12h-2.25M5.25 12H3m14.764-7.756-1.59 1.59m-11.362 11.362-1.59 1.59M12 7.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z" />
+                    </svg>
+                    <!-- Lua -->
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- DASHBOARD DE ESTATÍSTICAS -->
+            <div class="stats-dashboard">
+                <div class="stats-text">
+                    <span id="stats-counter" class="stats-counter">0 de 0 itens</span>
+                    <span id="stats-percentage" class="stats-percentage">0% concluído</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="stats-progress-bar" class="progress-bar" style="width: 0%"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- FORMULÁRIO DE ADIÇÃO DE PRODUTOS -->
+        <section class="form-section">
+            <form id="add-product-form" class="glass-panel add-form">
+                <div class="form-row main-fields">
+                    <div class="input-group search-input-group">
+                        <label for="product-name">Produto</label>
+                        <input type="text" id="product-name" placeholder="Ex: Leite, Maçãs..." required autocomplete="off">
+                        <!-- Recomendações Rápidas Popover -->
+                        <div id="autocomplete-suggestions" class="autocomplete-dropdown hidden"></div>
+                    </div>
+                </div>
+                
+                <div class="form-row secondary-fields">
+                    <div class="input-group quantity-group">
+                        <label for="product-quantity">Quant.</label>
+                        <div class="quantity-control-wrapper">
+                            <button type="button" class="qty-btn" id="qty-minus">-</button>
+                            <input type="number" id="product-quantity" value="1" min="1" step="any" required>
+                            <button type="button" class="qty-btn" id="qty-plus">+</button>
+                        </div>
+                    </div>
+
+                    <div class="input-group unit-group">
+                        <label for="product-unit">Unidade</label>
+                        <select id="product-unit">
+                            <option value="un">un</option>
+                            <option value="kg">kg</option>
+                            <option value="g">g</option>
+                            <option value="L">L</option>
+                            <option value="ml">ml</option>
+                            <option value="pacotes">pct</option>
+                            <option value="latas">lata</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group category-group">
+                        <label for="product-category">Categoria</label>
+                        <select id="product-category" required>
+                            <option value="" disabled selected>Selecionar...</option>
+                            <option value="Frutas">Frutas</option>
+                            <option value="Limpeza e Higiene">Limpeza/Higiene</option>
+                            <option value="Casa e Cozinha">Casa/Cozinha</option>
+                            <option value="Congelados">Congelados</option>
+                            <option value="Bebidas">Bebidas</option>
+                            <option value="Laticínios">Laticínios</option>
+                            <option value="Charcutaria">Charcutaria</option>
+                            <option value="Merciaria">Merciaria</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" id="add-btn" class="submit-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="btn-icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    <span>Adicionar Item</span>
+                </button>
+            </form>
+
+            <!-- CHIPS DE ADIÇÃO RÁPIDA -->
+            <div class="quick-chips">
+                <span class="quick-title">Sugestões:</span>
+                <div class="chips-container">
+                    <button type="button" class="quick-chip" data-name="Bananas" data-cat="Frutas" data-unit="un">🍌 Banana</button>
+                    <button type="button" class="quick-chip" data-name="Leite" data-cat="Laticínios" data-unit="L">🥛 Leite</button>
+                    <button type="button" class="quick-chip" data-name="Pão" data-cat="Merciaria" data-unit="un">🍞 Pão</button>
+                    <button type="button" class="quick-chip" data-name="Café" data-cat="Merciaria" data-unit="g">☕ Café</button>
+                    <button type="button" class="quick-chip" data-name="Detergente" data-cat="Limpeza e Higiene" data-unit="L">🧼 Detergente</button>
+                    <button type="button" class="quick-chip" data-name="Água" data-cat="Bebidas" data-unit="L">💧 Água</button>
+                    <button type="button" class="quick-chip" data-name="Queijo" data-cat="Charcutaria" data-unit="g">🧀 Queijo</button>
+                    <button type="button" class="quick-chip" data-name="Pizza" data-cat="Congelados" data-unit="un">🍕 Pizza</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- FILTROS E PESQUISA DE ITENS -->
+        <section class="filters-section">
+            <div class="search-bar">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="search-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21-21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+                <input type="text" id="search-items-input" placeholder="Filtrar por nome...">
+                <button type="button" id="clear-search-btn" class="clear-search hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- FILTRO DE ESTADO -->
+            <div class="filter-tabs">
+                <button class="tab-btn active" data-filter="all">Todos</button>
+                <button class="tab-btn" data-filter="pending">Por Comprar</button>
+                <button class="tab-btn" data-filter="completed">Comprados</button>
+            </div>
+            
+            <!-- FILTRO RÁPIDO DE CATEGORIAS -->
+            <div class="category-filters-scroll">
+                <button class="cat-filter-btn active" data-category="all">Todas as Categorias</button>
+                <button class="cat-filter-btn" data-category="Frutas">Frutas</button>
+                <button class="cat-filter-btn" data-category="Limpeza e Higiene">Limpeza e Higiene</button>
+                <button class="cat-filter-btn" data-category="Casa e Cozinha">Casa e Cozinha</button>
+                <button class="cat-filter-btn" data-category="Congelados">Congelados</button>
+                <button class="cat-filter-btn" data-category="Bebidas">Bebidas</button>
+                <button class="cat-filter-btn" data-category="Laticínios">Laticínios</button>
+                <button class="cat-filter-btn" data-category="Charcutaria">Charcutaria</button>
+                <button class="cat-filter-btn" data-category="Merciaria">Merciaria</button>
+            </div>
+        </section>
+
+        <!-- LISTA DE PRODUTOS -->
+        <main class="list-container">
+            <!-- LISTA VAZIA STATE -->
+            <div id="empty-state" class="empty-state glass-panel">
+                <div class="empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                    </svg>
+                </div>
+                <h2>A sua lista está vazia!</h2>
+                <p>Adicione alguns itens acima ou utilize as sugestões rápidas para começar a planear as suas compras.</p>
+            </div>
+
+            <!-- RESULTADOS NÃO ENCONTRADOS PARA FILTROS STATE -->
+            <div id="no-results-state" class="empty-state glass-panel hidden">
+                <div class="empty-icon text-muted">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21-21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                </div>
+                <h2>Nenhum item encontrado</h2>
+                <p>Nenhum produto corresponde aos filtros ou pesquisa selecionada. Experimente limpar os filtros.</p>
+            </div>
+
+            <!-- LISTAGEM ATIVA DOS ITENS -->
+            <div id="shopping-list" class="shopping-list-grid">
+                <!-- Inserido dinamicamente via JS -->
+            </div>
+        </main>
+
+        <!-- AÇÕES GLOBAIS & RODAPÉ -->
+        <footer class="app-footer">
+            <div class="footer-actions">
+                <button type="button" id="share-list-btn" class="footer-btn action-share">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
+                    </svg>
+                    <span>Partilhar Lista</span>
+                </button>
+                
+                <button type="button" id="clear-list-btn" class="footer-btn action-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                    </svg>
+                    <span>Limpar Lista</span>
+                </button>
+            </div>
+            
+            <p class="app-copy">Desenvolvido com carinho para as suas compras cotidianas.</p>
+        </footer>
+    </div>
+
+    <!-- MODAL DE EDIÇÃO DE PRODUTO -->
+    <div id="edit-modal" class="modal-backdrop hidden">
+        <div class="modal-container glass-panel">
+            <div class="modal-header">
+                <h3>Editar Item</h3>
+                <button type="button" class="close-modal-btn" id="close-edit-modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="edit-product-form">
+                <input type="hidden" id="edit-product-id">
+                
+                <div class="input-group">
+                    <label for="edit-product-name">Nome do Produto</label>
+                    <input type="text" id="edit-product-name" required autocomplete="off">
+                </div>
+
+                <div class="modal-form-grid">
+                    <div class="input-group">
+                        <label for="edit-product-quantity">Quant.</label>
+                        <input type="number" id="edit-product-quantity" min="1" step="any" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="edit-product-unit">Unidade</label>
+                        <select id="edit-product-unit">
+                            <option value="un">un</option>
+                            <option value="kg">kg</option>
+                            <option value="g">g</option>
+                            <option value="L">L</option>
+                            <option value="ml">ml</option>
+                            <option value="pacotes">pct</option>
+                            <option value="latas">lata</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="edit-product-category">Categoria</label>
+                    <select id="edit-product-category" required>
+                        <option value="Frutas">Frutas</option>
+                        <option value="Limpeza e Higiene">Limpeza e Higiene</option>
+                        <option value="Casa e Cozinha">Casa e Cozinha</option>
+                        <option value="Congelados">Congelados</option>
+                        <option value="Bebidas">Bebidas</option>
+                        <option value="Laticínios">Laticínios</option>
+                        <option value="Charcutaria">Charcutaria</option>
+                        <option value="Merciaria">Merciaria</option>
+                    </select>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-edit-btn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO DE LIMPEZA -->
+    <div id="clear-confirm-modal" class="modal-backdrop hidden">
+        <div class="modal-container glass-panel modal-warning">
+            <div class="modal-header">
+                <h3>Limpar Lista Completa?</h3>
+                <button type="button" class="close-modal-btn" id="close-clear-modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <p>Tem a certeza de que deseja apagar todos os itens da sua lista de compras? Esta ação não pode ser desfeita.</p>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-clear-btn">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirm-clear-btn">Sim, Apagar Tudo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICAÇÃO VISUAL TOAST -->
+    <div id="toast-notification" class="toast hidden">
+        <span id="toast-message">Item adicionado com sucesso!</span>
+    </div>
+
+    <!-- SCRIPT DE LOGICA -->
+    <script src="app.js"></script>
+</body>
+</html>
